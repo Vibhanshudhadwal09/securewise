@@ -1,0 +1,35 @@
+.app {
+  min-height: 100vh;
+}
+
+.sider {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+.brand {
+  padding: 14px;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.header {
+  background: #fff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 0 16px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.content {
+  padding: 18px;
+}
+
+.globalBanner {
+  margin: 12px 18px 0 18px;
+}
+

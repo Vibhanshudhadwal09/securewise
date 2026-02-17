@@ -1,0 +1,153 @@
+.brand {
+  padding: 18px 18px 14px 18px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  font-size: 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.collapseBtn {
+  margin-left: auto;
+  opacity: 0.7;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+.nav {
+  padding: 10px 12px 18px 12px;
+  /* Sidebar container handles scrolling (AppShell.module.css). */
+}
+
+.sectionTitle {
+  padding: 12px 10px 6px 10px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.55);
+}
+.groupHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: rgba(15, 23, 42, 0.82);
+  cursor: pointer;
+  user-select: none;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.groupHeader:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.groupHeaderActive {
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  box-shadow: inset 3px 0 0 rgba(37, 99, 235, 0.9);
+  color: #0f172a;
+}
+.groupLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.groupLabel {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chev {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.items {
+  margin-left: 18px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.itemsWrap {
+  overflow: hidden;
+  transition: max-height 180ms ease, opacity 180ms ease;
+  will-change: max-height, opacity;
+}
+
+.itemsOpen {
+  max-height: 420px;
+  opacity: 1;
+}
+
+.itemsClosed {
+  max-height: 0;
+  opacity: 0;
+}
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 10px;
+  color: rgba(15, 23, 42, 0.75);
+  text-decoration: none;
+  font-size: 13px;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.itemSub {
+  padding-left: 12px;
+}
+.item:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: rgba(15, 23, 42, 0.95);
+}
+
+.itemActive {
+  background: rgba(37, 99, 235, 0.16);
+  color: #0f172a;
+  border: 1px solid rgba(37, 99, 235, 0.4);
+  box-shadow: inset 3px 0 0 rgba(37, 99, 235, 0.95);
+  font-weight: 600;
+}
+
+.itemDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  flex: 0 0 auto;
+}
+
+.collapsedLabel {
+  display: none;
+}
+
+.collapsed .groupLabel,
+.collapsed .sectionTitle,
+.collapsed .items,
+.collapsed .itemsWrap {
+  display: none;
+}
+
+.collapsed .groupHeader {
+  justify-content: center;
+}
+
