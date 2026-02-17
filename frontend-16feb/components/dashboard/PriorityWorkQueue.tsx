@@ -18,9 +18,9 @@ type PriorityWorkQueueProps = {
 };
 
 const priorityStyles: Record<string, string> = {
-  high: 'bg-red-50 text-red-600 border-red-200',
-  medium: 'bg-amber-50 text-amber-600 border-amber-200',
-  low: 'bg-slate-50 text-slate-600 border-slate-200',
+  high: 'bg-red-500/10 text-red-500 border-red-500/30',
+  medium: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
+  low: 'bg-slate-500/10 text-slate-500 border-slate-500/30',
 };
 
 export function PriorityWorkQueue({ items }: PriorityWorkQueueProps) {
@@ -40,40 +40,40 @@ export function PriorityWorkQueue({ items }: PriorityWorkQueueProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
-      <div className="p-6 border-b border-slate-200">
-        <h2 className="text-base font-semibold text-slate-900">Priority Work Queue</h2>
-        <p className="text-sm text-slate-600 mt-1">High-priority items requiring immediate attention</p>
+    <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--card-border)] shadow-[var(--card-shadow)] backdrop-blur-md">
+      <div className="p-6 border-b border-[var(--card-border)]">
+        <h2 className="text-base font-semibold text-[var(--text-primary)]">Priority Work Queue</h2>
+        <p className="text-sm text-[var(--text-secondary)] mt-1">High-priority items requiring immediate attention</p>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200 sticky top-0">
+          <thead className="bg-[rgba(15,23,42,0.6)] border-b border-[var(--card-border)] sticky top-0">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Item</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Type</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">Priority</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">Action</th>
+              <th className="px-6 py-3 text-left text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Item</th>
+              <th className="px-6 py-3 text-left text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Type</th>
+              <th className="px-6 py-3 text-left text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Status</th>
+              <th className="px-6 py-3 text-left text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Priority</th>
+              <th className="px-6 py-3 text-right text-[11px] font-bold text-[var(--text-tertiary)] uppercase tracking-wider">Action</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-slate-200">
+          <tbody className="divide-y divide-[var(--card-border)]">
             {items.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-sm text-slate-500">
+                <td colSpan={5} className="px-6 py-8 text-center text-sm text-[var(--text-secondary)]">
                   No priority items at this time
                 </td>
               </tr>
             ) : (
               items.map((item, index) => (
-                <tr key={`${item.type}-${item.item_id}-${index}`} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm text-slate-900">{item.title}</td>
-                  <td className="px-6 py-4 text-sm text-slate-600">{item.type.replace(/_/g, ' ')}</td>
+                <tr key={`${item.type}-${item.item_id}-${index}`} className="hover:bg-[rgba(59,130,246,0.05)] transition-colors">
+                  <td className="px-6 py-4 text-sm text-[var(--text-primary)] font-medium">{item.title}</td>
+                  <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">{item.type.replace(/_/g, ' ')}</td>
                   <td className="px-6 py-4">
-                    <Badge className="bg-slate-50 text-slate-600 border-slate-200">{item.status}</Badge>
+                    <Badge className="bg-slate-500/10 text-[var(--text-secondary)] border-slate-500/20">{item.status}</Badge>
                   </td>
                   <td className="px-6 py-4">
-                    <Badge className={priorityStyles[item.priority] || priorityStyles.low}>{item.priority}</Badge>
+                    <Badge className={`${priorityStyles[item.priority] || priorityStyles.low}`}>{item.priority}</Badge>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Tooltip>
@@ -82,12 +82,12 @@ export function PriorityWorkQueue({ items }: PriorityWorkQueueProps) {
                           variant="ghost"
                           size="sm"
                           onClick={() => router.push(getRouteForItem(item))}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          className="text-[var(--accent-blue)] hover:text-[var(--accent-cyan)] hover:bg-[rgba(59,130,246,0.1)]"
                         >
                           Open
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Open the relevant workbench or review queue</TooltipContent>
+                      <TooltipContent className="bg-[var(--card-bg)] text-[var(--text-primary)] border-[var(--card-border)]">Open the relevant workbench or review queue</TooltipContent>
                     </Tooltip>
                   </td>
                 </tr>

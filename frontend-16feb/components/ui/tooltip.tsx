@@ -18,7 +18,10 @@ export function Tooltip({ children, className }: TooltipProps) {
   return <div className={`relative inline-flex group ${className || ''}`}>{children}</div>;
 }
 
-export function TooltipTrigger({ children }: TooltipTriggerProps) {
+export function TooltipTrigger({ children, asChild }: TooltipTriggerProps) {
+  if (asChild && React.isValidElement(children)) {
+    return children;
+  }
   return <div className="inline-flex">{children}</div>;
 }
 

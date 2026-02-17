@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Search, Filter } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCompliance } from '@/contexts/ComplianceContext';
+import { Loading } from '@/components/ui/Loading';
 
 type EvidenceRow = {
   evidence_id: string;
@@ -179,248 +180,257 @@ export default function EvidenceCollectionPage() {
   }
 
   if (loading && !evidence.length) {
-    return <div className="p-8">Loading evidence collection...</div>;
+    return <div className="p-8 flex justify-center"><Loading /></div>;
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
         <div>
-          <nav className="text-xs text-slate-500 mb-2">
-            <span>GRC / Compliance</span> <span className="px-1">/</span> <span className="text-slate-900">Evidence Collection</span>
+          <nav className="text-xs text-[var(--text-secondary)] mb-2">
+            <span>GRC / Compliance</span> <span className="px-1">/</span> <span className="text-[var(--text-primary)]">Evidence Collection</span>
           </nav>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">Evidence Collection</h1>
-          <p className="text-sm text-slate-600 mt-2">
+          <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Evidence Collection</h1>
+          <p className="text-sm text-[var(--text-secondary)] mt-2">
             Collected evidence from connected systems. Open a control to review and accept evidence for an audit period.
           </p>
         </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6 bg-purple-50 border border-purple-100">
-          <div className="text-sm text-gray-600">Total Evidence</div>
-          <div className="text-3xl font-bold mt-2">{stats?.total_evidence?.toLocaleString() || 0}</div>
-          <div className="text-sm text-gray-500 mt-1">Collected items</div>
-        </Card>
-        <Card className="p-6 bg-green-50 border border-green-100">
-          <div className="text-sm text-gray-600">Approved</div>
-          <div className="text-3xl font-bold mt-2">{stats?.approved?.toLocaleString() || 0}</div>
-          <div className="text-sm text-gray-500 mt-1">Accepted evidence</div>
-        </Card>
-        <Card className="p-6 bg-yellow-50 border border-yellow-100">
-          <div className="text-sm text-gray-600">Needs Review</div>
-          <div className="text-3xl font-bold mt-2">{stats?.needs_review?.toLocaleString() || 0}</div>
-          <div className="text-sm text-gray-500 mt-1">Awaiting approval</div>
-        </Card>
-        <Card className="p-6 bg-blue-50 border border-blue-100">
-          <div className="text-sm text-gray-600">Rejected</div>
-          <div className="text-3xl font-bold mt-2">{stats?.rejected?.toLocaleString() || 0}</div>
-          <div className="text-sm text-gray-500 mt-1">Needs attention</div>
-        </Card>
-      </div>
-
-      <div className="flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex gap-3 flex-wrap">
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setPage(1);
-            }}
-            className="border rounded px-3 py-2"
-          >
-            <option value="all">All Status</option>
-            <option value="needs_review">Needs Review</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-          </select>
-
-          <select
-            value={sourceFilter}
-            onChange={(e) => {
-              setSourceFilter(e.target.value);
-              setPage(1);
-            }}
-            className="border rounded px-3 py-2"
-          >
-            <option value="all">All Sources</option>
-            <option value="wazuh_indexer">Wazuh</option>
-            <option value="securewise.risk_autogen">Risk Autogen</option>
-          </select>
-
-          <input
-            type="text"
-            placeholder="Search evidence..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setPage(1);
-            }}
-            className="border rounded px-3 py-2 w-64"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm">
+            <div className="text-sm text-[var(--text-secondary)]">Total Evidence</div>
+            <div className="text-3xl font-bold mt-2 text-[var(--text-primary)]">{stats?.total_evidence?.toLocaleString() || 0}</div>
+            <div className="text-sm text-[var(--text-tertiary)] mt-1">Collected items</div>
+          </Card>
+          <Card className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm">
+            <div className="text-sm text-[var(--text-secondary)]">Approved</div>
+            <div className="text-3xl font-bold mt-2 text-green-600 dark:text-green-400">{stats?.approved?.toLocaleString() || 0}</div>
+            <div className="text-sm text-[var(--text-tertiary)] mt-1">Accepted evidence</div>
+          </Card>
+          <Card className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm">
+            <div className="text-sm text-[var(--text-secondary)]">Needs Review</div>
+            <div className="text-3xl font-bold mt-2 text-amber-600 dark:text-amber-400">{stats?.needs_review?.toLocaleString() || 0}</div>
+            <div className="text-sm text-[var(--text-tertiary)] mt-1">Awaiting approval</div>
+          </Card>
+          <Card className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm">
+            <div className="text-sm text-[var(--text-secondary)]">Rejected</div>
+            <div className="text-3xl font-bold mt-2 text-red-600 dark:text-red-400">{stats?.rejected?.toLocaleString() || 0}</div>
+            <div className="text-sm text-[var(--text-tertiary)] mt-1">Needs attention</div>
+          </Card>
         </div>
 
-        {selectedItems.size > 0 ? (
-          <div className="text-xs text-slate-500">
-            {selectedItems.size} selected · Open a control to review evidence
+        <div className="flex flex-wrap gap-4 items-center justify-between">
+          <div className="flex gap-3 flex-wrap">
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="appearance-none border border-[var(--card-border)] rounded-lg px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
+              >
+                <option value="all">All Status</option>
+                <option value="needs_review">Needs Review</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <Filter className="absolute right-2.5 top-2.5 h-4 w-4 text-[var(--text-secondary)] pointer-events-none" />
+            </div>
+
+            <div className="relative">
+              <select
+                value={sourceFilter}
+                onChange={(e) => {
+                  setSourceFilter(e.target.value);
+                  setPage(1);
+                }}
+                className="appearance-none border border-[var(--card-border)] rounded-lg px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
+              >
+                <option value="all">All Sources</option>
+                <option value="wazuh_indexer">Wazuh</option>
+                <option value="securewise.risk_autogen">Risk Autogen</option>
+              </select>
+              <Filter className="absolute right-2.5 top-2.5 h-4 w-4 text-[var(--text-secondary)] pointer-events-none" />
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search evidence..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+                className="border border-[var(--card-border)] rounded-lg px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] pl-9 w-64 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
+              />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--text-secondary)]" />
+            </div>
           </div>
-        ) : null}
-      </div>
 
-      <div className="border rounded-lg overflow-hidden bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="p-3 text-left">
-                <input
-                  type="checkbox"
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      setSelectedItems(new Set(evidence.map((ev) => ev.evidence_id)));
-                    } else {
-                      setSelectedItems(new Set());
-                    }
-                  }}
-                  checked={selectedItems.size > 0 && selectedItems.size === evidence.length}
-                />
-              </th>
-              <th className="p-3 text-left text-sm font-medium">Evidence ID</th>
-              <th className="p-3 text-left text-sm font-medium">Control</th>
-              <th className="p-3 text-left text-sm font-medium">Framework</th>
-              <th className="p-3 text-left text-sm font-medium">Source</th>
-              <th className="p-3 text-left text-sm font-medium">Captured</th>
-              <th className="p-3 text-left text-sm font-medium">Status</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {evidence.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="text-center p-8 text-gray-500">
-                  No evidence found
-                </td>
-              </tr>
-            ) : (
-              evidence.map((row) => {
-                const status = String(row.approval_status || 'needs_review');
-                const controlId = String(row.control_id || '');
-                const frameworkValue = String(row.framework || '');
-                const evidenceId = String(row.evidence_id || '');
-                return (
-                  <tr key={row.evidence_id} className="border-b hover:bg-gray-50">
-                    <td className="p-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.has(row.evidence_id)}
-                        onChange={() => toggleSelection(row.evidence_id)}
-                      />
-                    </td>
-                    <td className="p-3 font-mono text-xs">{row.evidence_id.slice(0, 8)}...</td>
-                    <td className="p-3">
-                      <div className="font-medium">{row.control_id}</div>
-                      <div className="text-xs text-gray-600">{row.control_title || '-'}</div>
-                    </td>
-                    <td className="p-3">
-                      <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs uppercase">
-                        {row.framework || 'n/a'}
-                      </span>
-                    </td>
-                    <td className="p-3 text-sm">{row.source || '-'}</td>
-                    <td className="p-3 text-sm">
-                      {row.captured_at ? new Date(row.captured_at).toLocaleDateString() : '-'}
-                    </td>
-                    <td className="p-3">
-                      <Badge variant={statusVariant(status)}>{status.replace('_', ' ')}</Badge>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => router.push(`/compliance/evidence-collection/${row.evidence_id}`)}
-                              className="text-xs"
-                            >
-                              View Evidence
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Open detailed evidence page with full metadata</TooltipContent>
-                        </Tooltip>
+          {selectedItems.size > 0 ? (
+            <div className="text-xs text-[var(--text-secondary)]">
+              {selectedItems.size} selected · Open a control to review evidence
+            </div>
+          ) : null}
+        </div>
 
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                const params = new URLSearchParams({
-                                  framework: row.framework || 'iso27001',
-                                  evidenceId: row.evidence_id,
-                                });
-                                router.push(`/compliance/controls/${row.control_id}/workbench?${params.toString()}`);
-                              }}
-                              className="text-xs"
-                            >
-                              Open Control
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            Navigate to control workbench with this evidence highlighted
-                          </TooltipContent>
-                        </Tooltip>
-
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={!row.source_ref}
-                              onClick={() => {
-                                if (!row.source_ref) return;
-                                window.open(row.source_ref, '_blank', 'noopener,noreferrer');
-                              }}
-                              className="text-xs"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                              Open in Source
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {row.source_ref
-                              ? 'Open the original record in the connected tool.'
-                              : 'No source link available for this item.'}
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
+        <div className="border border-[var(--card-border)] rounded-lg overflow-hidden bg-[var(--card-bg)] shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-[var(--bg-secondary)] border-b border-[var(--card-border)] text-[var(--text-secondary)]">
+                <tr>
+                  <th className="p-3 text-left w-10">
+                    <input
+                      type="checkbox"
+                      className="rounded border-[var(--card-border)] bg-[var(--bg-primary)] text-[var(--accent-blue)] focus:ring-[var(--accent-blue)]"
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedItems(new Set(evidence.map((ev) => ev.evidence_id)));
+                        } else {
+                          setSelectedItems(new Set());
+                        }
+                      }}
+                      checked={selectedItems.size > 0 && selectedItems.size === evidence.length}
+                    />
+                  </th>
+                  <th className="p-3 text-left font-medium">Evidence ID</th>
+                  <th className="p-3 text-left font-medium">Control</th>
+                  <th className="p-3 text-left font-medium">Framework</th>
+                  <th className="p-3 text-left font-medium">Source</th>
+                  <th className="p-3 text-left font-medium">Captured</th>
+                  <th className="p-3 text-left font-medium">Status</th>
+                  <th className="px-4 py-3 text-right font-medium uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--card-border)]">
+                {evidence.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center p-8 text-[var(--text-secondary)]">
+                      No evidence found
                     </td>
                   </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                ) : (
+                  evidence.map((row) => {
+                    const status = String(row.approval_status || 'needs_review');
+                    return (
+                      <tr key={row.evidence_id} className="hover:bg-[var(--bg-secondary)] transition-colors">
+                        <td className="p-3">
+                          <input
+                            type="checkbox"
+                            className="rounded border-[var(--card-border)] bg-[var(--bg-primary)] text-[var(--accent-blue)] focus:ring-[var(--accent-blue)]"
+                            checked={selectedItems.has(row.evidence_id)}
+                            onChange={() => toggleSelection(row.evidence_id)}
+                          />
+                        </td>
+                        <td className="p-3 font-mono text-xs text-[var(--accent-blue)]">{row.evidence_id.slice(0, 8)}...</td>
+                        <td className="p-3">
+                          <div className="font-medium text-[var(--text-primary)]">{row.control_id}</div>
+                          <div className="text-xs text-[var(--text-secondary)] line-clamp-1">{row.control_title || '-'}</div>
+                        </td>
+                        <td className="p-3">
+                          <span className="px-2 py-0.5 bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)] rounded text-xs uppercase font-medium">
+                            {row.framework || 'n/a'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-sm text-[var(--text-primary)]">{row.source || '-'}</td>
+                        <td className="p-3 text-sm text-[var(--text-secondary)]">
+                          {row.captured_at ? new Date(row.captured_at).toLocaleDateString() : '-'}
+                        </td>
+                        <td className="p-3">
+                          <Badge variant={statusVariant(status)}>{status.replace('_', ' ')}</Badge>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => router.push(`/compliance/evidence-collection/${row.evidence_id}`)}
+                                  className="text-xs h-8 px-2"
+                                >
+                                  View
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>View Details</TooltipContent>
+                            </Tooltip>
 
-      <div className="flex justify-between items-center">
-        <div className="text-sm text-gray-600">
-          Page {page} of {totalPages}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const params = new URLSearchParams({
+                                      framework: row.framework || 'iso27001',
+                                      evidenceId: row.evidence_id,
+                                    });
+                                    router.push(`/compliance/controls/${row.control_id}/workbench?${params.toString()}`);
+                                  }}
+                                  className="text-xs h-8 px-2"
+                                >
+                                  Control
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Open Control Workbench
+                              </TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={!row.source_ref}
+                                  onClick={() => {
+                                    if (!row.source_ref) return;
+                                    window.open(row.source_ref, '_blank', 'noopener,noreferrer');
+                                  }}
+                                  className="text-xs h-8 px-2"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {row.source_ref
+                                  ? 'Open Source'
+                                  : 'No source link'}
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-            Previous
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={page === totalPages}
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          >
-            Next
-          </Button>
+
+        <div className="flex justify-between items-center bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3 shadow-sm">
+          <div className="text-sm text-[var(--text-secondary)]">
+            Page {page} of {totalPages}
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+              Previous
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              Next
+            </Button>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );

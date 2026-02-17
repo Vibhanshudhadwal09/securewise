@@ -5,6 +5,7 @@ import { Activity, AlertTriangle, ClipboardList, Clock, FileText, Shield, Trendi
 import { KpiCard } from '@/components/dashboard/KpiCard';
 import { DataHealthBanner } from '@/components/dashboard/DataHealthBanner';
 import { PriorityWorkQueue } from '@/components/dashboard/PriorityWorkQueue';
+import { Loading } from '@/components/ui/Loading';
 
 type DashboardData = {
   health: {
@@ -93,16 +94,16 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-600">Loading dashboard...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
+        <Loading />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-slate-600">{error || 'Failed to load dashboard data'}</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-[var(--text-secondary)]">{error || 'Failed to load dashboard data'}</div>
       </div>
     );
   }
@@ -112,39 +113,39 @@ export default function DashboardPage() {
   const isMissing = (value: number | null) => value === null || value === undefined;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen">
       <div className="max-w-[1400px] w-full mx-auto px-6 py-6">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900">Dashboard</h1>
-            <p className="text-sm text-slate-600 mt-2">
+            <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Dashboard</h1>
+            <p className="text-sm text-[var(--text-secondary)] mt-2">
               Operational view of compliance readiness, evidence health, and security posture.
             </p>
           </div>
           <div className="flex gap-2">
             <select
-              className="border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-700 bg-white"
+              className="border border-[var(--card-border)] rounded-md px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--card-bg)] focus:outline-none focus:border-[var(--accent-blue)]"
               value={framework}
               onChange={(e) => setFramework(e.target.value)}
             >
-              <option value="iso27001">ISO 27001</option>
-              <option value="soc2">SOC 2</option>
+              <option value="iso27001" className="bg-[var(--bg-primary)]">ISO 27001</option>
+              <option value="soc2" className="bg-[var(--bg-primary)]">SOC 2</option>
             </select>
             <select
-              className="border border-slate-300 rounded-md px-3 py-2 text-sm text-slate-700 bg-white"
+              className="border border-[var(--card-border)] rounded-md px-3 py-2 text-sm text-[var(--text-primary)] bg-[var(--card-bg)] focus:outline-none focus:border-[var(--accent-blue)]"
               value={timeRange}
               onChange={(e) => setTimeRange(e.target.value)}
             >
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
+              <option value="7d" className="bg-[var(--bg-primary)]">Last 7 days</option>
+              <option value="30d" className="bg-[var(--bg-primary)]">Last 30 days</option>
+              <option value="90d" className="bg-[var(--bg-primary)]">Last 90 days</option>
             </select>
           </div>
         </div>
 
         {health?.partial ? <DataHealthBanner reasons={health.reasons} sources={health.sources} /> : null}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <KpiCard
             title="Audit Readiness"
             value={isMissing(kpis.auditReadinessPct) ? '—' : `${kpis.auditReadinessPct}%`}
@@ -204,9 +205,7 @@ export default function DashboardPage() {
             actionTooltip="View security incidents"
             icon={Shield}
           />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {/* Merged second grid items */}
           <KpiCard
             title="Controls Missing Evidence"
             value={dashValue(kpis.controlsMissingEvidence)}

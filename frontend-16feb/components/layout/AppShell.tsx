@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useMemo, useRef, useState } from 'react';
-import styles from './AppShell.module.css';
 import { TopBar } from './TopBar';
 import { SidebarNav } from './SidebarNav';
 import Breadcrumb, { type BreadcrumbItem } from '../Breadcrumb';
@@ -42,18 +41,20 @@ export function AppShell(props: { children: React.ReactNode }) {
 
   return (
     <Ctx.Provider value={value}>
-      <div className={styles.shell}>
-        <aside className={`${styles.sidebar} ${collapsed ? styles.sidebarCollapsed : ''}`}>
+      <div className="flex min-h-screen">
+        <aside className={`fixed inset-y-0 left-0 z-50 h-screen w-72 flex-col overflow-y-auto border-r border-[var(--card-border)] bg-[var(--sidebar-bg)] transition-all duration-300 ${collapsed ? 'w-20' : 'w-72'}`}>
           <SidebarNav />
         </aside>
 
-        <div className={styles.main}>
-          <div className={styles.topbar}>
+        <div className={`flex min-h-screen flex-1 flex-col transition-all duration-300 ${collapsed ? 'ml-20' : 'ml-72'}`}>
+          <div className="sticky top-0 z-40 w-full">
             <TopBar />
           </div>
-          <Breadcrumb items={breadcrumbItems || undefined} />
-          <div className={styles.contentOuter}>
-            <div className={styles.contentInner}>{props.children}</div>
+          <div className="flex-1 px-8 py-6">
+            <Breadcrumb items={breadcrumbItems || undefined} />
+            <div className="mx-auto max-w-[1600px] animate-fadeIn">
+              {props.children}
+            </div>
           </div>
         </div>
         <ChatWidget />

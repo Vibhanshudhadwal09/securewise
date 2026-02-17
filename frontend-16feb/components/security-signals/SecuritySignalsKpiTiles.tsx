@@ -3,7 +3,6 @@
 import React, { useMemo } from 'react';
 import { Card, Skeleton, Statistic } from 'antd';
 import type { SecuritySignalsSummary } from './types';
-import styles from './SecuritySignalsKpiTiles.module.css';
 import HelpTooltip from '@/components/help/Tooltip';
 import { helpContent } from '@/config/helpContent';
 
@@ -37,12 +36,12 @@ export function SecuritySignalsKpiTiles(props: {
   );
 
   return (
-    <div className={styles.grid}>
+    <div className="grid grid-cols-12 gap-3">
       {tiles.map((t) => (
-        <div key={t.key} className={styles.tile}>
+        <div key={t.key} className="col-span-12 sm:col-span-6 lg:col-span-4 xl:col-span-3">
           <HelpTooltip content={helpContent.dashboard.kpis.content} className="w-full">
             <div>
-              <Card>
+              <Card bordered={false} className="!border-none !bg-[var(--card-bg)] !shadow-[var(--card-shadow)]">
                 {props.loading ? (
                   <Skeleton active paragraph={false} />
                 ) : (
@@ -53,7 +52,11 @@ export function SecuritySignalsKpiTiles(props: {
                       if (t.fw && props.onClickFramework) props.onClickFramework(t.fw);
                     }}
                   >
-                    <Statistic title={t.title} value={t.value as any} />
+                    <Statistic
+                      title={<span className="text-[var(--text-secondary)]">{t.title}</span>}
+                      value={t.value as any}
+                      valueStyle={{ color: 'var(--text-primary)' }}
+                    />
                   </div>
                 )}
               </Card>

@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Input, Select, Tag, Tooltip, Typography } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
-import styles from './TopBar.module.css';
 import { useShell } from './AppShell';
 import AssetSelector from '@/components/AssetSelector';
 import type { Asset } from '@/types/asset';
@@ -112,7 +111,7 @@ export function TopBar() {
         const j = JSON.parse(raw);
         if (Array.isArray(j)) setRecentAssets(j.map(String));
       }
-    } catch {}
+    } catch { }
   }, []);
 
   const currentAssetId = useMemo(() => {
@@ -146,20 +145,30 @@ export function TopBar() {
   const labelIdx = health?.components?.signalsIndexer?.label || 'Signals';
 
   return (
-    <div className={styles.bar}>
-      {partialAny ? <div className={styles.partialStrip}>Partial data — some panels may be missing signals due to index availability.</div> : null}
-      <div className={styles.inner}>
-        <div className={styles.left}>
-          <Typography.Text strong>SecureWise</Typography.Text>
-          <Tag color="blue">Enterprise</Tag>
+    <div className="w-full bg-[rgba(15,23,42,0.8)] border-b border-[var(--card-border)] backdrop-blur-md sticky top-0 z-50">
+      {partialAny ?
+        <div className="bg-amber-500/10 border-b border-amber-500/20 text-amber-500 text-xs px-5 py-1.5">
+          Partial data — some panels may be missing signals due to index availability.
+        </div>
+        : null}
+
+      <div className="flex items-center justify-between gap-4 px-5 py-3 flex-wrap">
+        {/* Left */}
+        <div className="flex items-center gap-2.5 min-w-[180px]">
+          {/* Use standard text color */}
+          <Typography.Text strong className="!text-[var(--text-primary)] text-lg">SecureWise</Typography.Text>
+          <Tag color="geekblue" className="border-none bg-[rgba(59,130,246,0.15)] text-[var(--accent-blue)]">Enterprise</Tag>
         </div>
 
-        <div className={styles.center}>
-          <div className={styles.controls}>
+        {/* Center */}
+        <div className="flex-1 min-w-0 flex justify-start">
+          <div className="w-full flex items-center gap-2.5 flex-wrap">
             <Select
               style={{ width: 260 }}
               value={tenantId}
               showSearch
+              className="custom-select"
+              popupClassName="custom-select-dropdown"
               options={[
                 { label: 'Demo Tenant (demo-tenant)', value: 'demo-tenant' },
                 ...tenants.map((t) => ({ label: `${t.name} (${t.tenant_id})`, value: t.tenant_id })),
@@ -170,6 +179,8 @@ export function TopBar() {
             <Select
               style={{ width: 160 }}
               value={range}
+              className="custom-select"
+              popupClassName="custom-select-dropdown"
               options={[
                 { label: 'Last 1h', value: '1h' },
                 { label: 'Last 24h', value: '24h' },
@@ -188,7 +199,7 @@ export function TopBar() {
                 setRecentAssets(updated);
                 try {
                   window.localStorage.setItem('recentAssets', JSON.stringify(updated));
-                } catch {}
+                } catch { }
                 // Navigate to the asset cockpit
                 const next = new URLSearchParams(sp?.toString() || '');
                 next.set('tenantId', tenantId);
@@ -197,34 +208,41 @@ export function TopBar() {
               }}
             />
 
-            <Input.Search
-              className={styles.search}
-              placeholder="Search security signals (agent, rule, message...)"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              onSearch={(val) => {
-                const s = String(val || '').trim();
-                const next = new URLSearchParams(sp?.toString() || '');
-                // Preserve context keys + set q
-                next.set('tenantId', tenantId);
-                next.set('range', range);
-                if (s) next.set('q', s);
-                else next.delete('q');
-                router.push(`/dashboard?${next.toString()}`);
-              }}
-              allowClear
-            />
+            <div className="flex-1 min-w-[260px] max-w-[560px]">
+              <Input.Search
+                placeholder="Search security signals (agent, rule, message...)"
+                value={q}
+                className="custom-input-search"
+                onChange={(e) => setQ(e.target.value)}
+                onSearch={(val) => {
+                  const s = String(val || '').trim();
+                  const next = new URLSearchParams(sp?.toString() || '');
+                  // Preserve context keys + set q
+                  next.set('tenantId', tenantId);
+                  next.set('range', range);
+                  if (s) next.set('q', s);
+                  else next.delete('q');
+                  router.push(`/dashboard?${next.toString()}`);
+                }}
+                allowClear
+              />
+            </div>
           </div>
         </div>
 
-        <div className={styles.right}>
+        {/* Right */}
+        <div className="flex items-center gap-2.5 min-w-[220px] justify-end">
           <Tooltip title={labelMgr}>
-            <span className={styles.statusPill}>{labelMgr}</span>
+            <span className="text-xs opacity-90 px-2.5 py-1 border border-[var(--accent-blue)]/20 rounded-full bg-[rgba(59,130,246,0.08)] text-[var(--accent-blue)]">
+              {labelMgr}
+            </span>
           </Tooltip>
           <Tooltip title={labelIdx}>
-            <span className={styles.statusPill}>{labelIdx}</span>
+            <span className="text-xs opacity-90 px-2.5 py-1 border border-[var(--accent-blue)]/20 rounded-full bg-[rgba(59,130,246,0.08)] text-[var(--accent-blue)]">
+              {labelIdx}
+            </span>
           </Tooltip>
-          <Button size="small" onClick={() => window.location.reload()}>
+          <Button size="small" onClick={() => window.location.reload()} className="!bg-transparent !border-[var(--card-border)] !text-[var(--text-secondary)] hover:!text-[var(--text-primary)] hover:!border-[var(--text-secondary)]">
             Refresh
           </Button>
         </div>

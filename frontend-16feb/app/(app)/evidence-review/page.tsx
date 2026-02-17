@@ -1,5 +1,7 @@
 'use client';
 
+import { Loading } from '@/components/ui/Loading';
+
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
@@ -247,7 +249,7 @@ export default function EvidenceReviewPage() {
         </div>
         <div className="space-y-3">
           {loading ? (
-            <div>Loading...</div>
+            <Loading />
           ) : queue.length === 0 ? (
             <div className="text-center text-gray-500 py-6">No evidence to review</div>
           ) : (

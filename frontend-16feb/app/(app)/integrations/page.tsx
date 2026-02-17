@@ -1,5 +1,7 @@
 'use client';
 
+import { Loading } from '@/components/ui/Loading';
+
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Search, Filter, Check, ExternalLink, Zap } from 'lucide-react';
@@ -334,10 +336,7 @@ export default function IntegrationsPage() {
       <div className="p-8">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading integrations...</p>
-            </div>
+            <Loading />
           </div>
         ) : filteredIntegrations.length === 0 ? (
           <div className="text-center py-20">

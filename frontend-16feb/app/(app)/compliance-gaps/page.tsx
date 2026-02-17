@@ -1,5 +1,7 @@
 'use client';
 
+import { Loading } from '@/components/ui/Loading';
+
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
@@ -171,7 +173,7 @@ export default function ComplianceGapsPage() {
 
       <div className="space-y-3">
         {loading ? (
-          <div>Loading...</div>
+          <Loading />
         ) : gaps.length === 0 ? (
           <Card className="p-8 text-center text-gray-500">No gaps found. Run analysis to identify compliance gaps.</Card>
         ) : (

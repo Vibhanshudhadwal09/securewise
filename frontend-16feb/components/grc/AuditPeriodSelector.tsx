@@ -14,6 +14,7 @@ export type AuditPeriod = {
 };
 
 function readCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
   const cur = document.cookie.split(';').map((s) => s.trim()).find((s) => s.startsWith(`${name}=`));
   if (!cur) return null;
   const raw = cur.split('=')[1] || '';
@@ -91,29 +92,29 @@ export function AuditPeriodSelector(props: {
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
         <select
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm"
+          className="rounded-md border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none"
           value={props.value || ''}
           onChange={(e) => props.onChange(e.target.value || null)}
           aria-label="Audit period selector"
           disabled={loading}
         >
-          <option value="">{loading ? 'Loading periods…' : 'Select audit period'}</option>
+          <option value="" className="bg-[var(--bg-primary)] text-[var(--text-primary)]">{loading ? 'Loading periods…' : 'Select audit period'}</option>
           {items.map((p) => (
-            <option key={p.period_id} value={p.period_id}>
+            <option key={p.period_id} value={p.period_id} className="bg-[var(--bg-primary)] text-[var(--text-primary)]">
               {p.name} ({p.status})
             </option>
           ))}
         </select>
         <button
           type="button"
-          className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium shadow-sm"
+          className="rounded-md border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-blue)] transition-colors shadow-sm"
           onClick={() => refresh()}
         >
           Refresh
         </button>
         <button
           type="button"
-          className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm"
+          className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-[0_0_10px_rgba(37,99,235,0.3)] hover:bg-blue-700 transition-colors"
           onClick={() => setCreateOpen((v) => !v)}
         >
           New period
@@ -121,38 +122,38 @@ export function AuditPeriodSelector(props: {
       </div>
 
       {createOpen ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+        <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-4 shadow-[var(--card-shadow)] mt-2 backdrop-blur-md">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div>
-              <label className="text-xs font-medium text-gray-700">Name</label>
-              <input className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" value={name} onChange={(e) => setName(e.target.value)} />
+              <label className="text-xs font-medium text-[var(--text-secondary)]">Name</label>
+              <input className="mt-1 w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-700">Starts</label>
-              <input type="date" className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+              <label className="text-xs font-medium text-[var(--text-secondary)]">Starts</label>
+              <input type="date" className="mt-1 w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
             </div>
             <div>
-              <label className="text-xs font-medium text-gray-700">Ends</label>
-              <input type="date" className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+              <label className="text-xs font-medium text-[var(--text-secondary)]">Ends</label>
+              <input type="date" className="mt-1 w-full rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
             </div>
           </div>
           <div className="mt-3 flex items-center gap-2">
             <button
               type="button"
-              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-60"
+              className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-60 shadow-[0_0_10px_rgba(37,99,235,0.3)]"
               onClick={create}
               disabled={!name.trim() || !startsAt || !endsAt}
             >
               Create
             </button>
-            <button type="button" className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm" onClick={() => setCreateOpen(false)}>
+            <button type="button" className="rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]" onClick={() => setCreateOpen(false)}>
               Cancel
             </button>
           </div>
         </div>
       ) : null}
 
-      {error ? <div className="text-sm text-red-700">{error}</div> : null}
+      {error ? <div className="text-sm text-red-500">{error}</div> : null}
     </div>
   );
 }
