@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ClipboardCheck, FileText, Shield, Zap } from 'lucide-react';
+import { ClipboardCheck, FileText, Shield, Zap, ExternalLink } from 'lucide-react';
 import FrameworkSelector, { type FrameworkName } from '@/components/FrameworkSelector';
 import { AuditPeriodSelector } from '@/components/grc/AuditPeriodSelector';
 import { MetricCard } from '@/components/MetricCard';
@@ -436,22 +436,22 @@ export default function CompliancePage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[var(--card-shadow)] backdrop-blur-md">
-          <div className="border-b border-[var(--card-border)] px-5 py-4">
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl overflow-hidden shadow-sm">
+          <div className="p-6 border-b border-[var(--card-border)] flex items-center justify-between">
             <SectionHeader title="Controls" subtitle="Control status across evidence, review, and tests." />
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-[var(--card-border)] text-sm">
-              <thead className="bg-[rgba(15,23,42,0.6)] text-left text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-[var(--bg-secondary)] text-[var(--text-secondary)] font-medium border-b border-[var(--card-border)]">
                 <tr>
-                  <th className="px-5 py-3">Control</th>
-                  <th className="px-5 py-3">Applicability</th>
-                  <th className="px-5 py-3">Owner</th>
-                  <th className="px-5 py-3">Evidence</th>
-                  <th className="px-5 py-3">Review</th>
-                  <th className="px-5 py-3">Test</th>
-                  <th className="px-5 py-3">Due</th>
-                  <th className="px-5 py-3">Action</th>
+                  <th className="px-6 py-3">Control</th>
+                  <th className="px-6 py-3">Applicability</th>
+                  <th className="px-6 py-3">Owner</th>
+                  <th className="px-6 py-3">Evidence</th>
+                  <th className="px-6 py-3">Review</th>
+                  <th className="px-6 py-3">Test</th>
+                  <th className="px-6 py-3">Due</th>
+                  <th className="px-6 py-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--card-border)]">
@@ -465,18 +465,20 @@ export default function CompliancePage() {
                     )}&periodId=${encodeURIComponent(periodId)}`
                     : `/compliance/controls/${encodeURIComponent(c.control_id)}/workbench?framework=${encodeURIComponent(framework)}`;
                   return (
-                    <tr key={c.control_id} className="hover:bg-[rgba(59,130,246,0.05)] transition-colors">
-                      <td className="px-5 py-3">
-                        <div className="font-semibold text-[var(--text-primary)]">{c.control_id}</div>
-                        <div className="text-[var(--text-secondary)]">{c.title}</div>
+                    <tr key={c.control_id} className="hover:bg-[var(--bg-secondary)] transition-colors group">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-mono font-semibold text-[var(--accent-blue)]">{c.control_id}</span>
+                          <span className="text-[var(--text-secondary)] text-xs mt-0.5 line-clamp-1 group-hover:text-[var(--text-primary)] transition-colors">{c.title}</span>
+                        </div>
                       </td>
-                      <td className="px-5 py-3">
-                        <span className="rounded-full border border-[var(--card-border)] bg-[var(--bg-secondary)] px-2 py-1 text-xs text-[var(--text-secondary)]">
+                      <td className="px-6 py-4">
+                        <span className="inline-flex px-2 py-1 rounded text-xs font-medium bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--card-border)]">
                           {String(c.applicability || 'in scope')}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-[var(--text-secondary)]">{c.owner || '-'}</td>
-                      <td className="px-5 py-3">
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">{c.owner || '-'}</td>
+                      <td className="px-6 py-4">
                         <span
                           className={`rounded-full px-2 py-1 text-xs ${evidenceStatus === 'submitted'
                             ? 'bg-green-500/10 text-green-500 border border-green-500/30'
@@ -524,26 +526,25 @@ export default function CompliancePage() {
                                 : 'Untested'}
                         </span>
                       </td>
-                      <td className="px-5 py-3 text-xs text-[var(--text-tertiary)]">
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">
                         {c.due_date ? String(c.due_date).slice(0, 10) : '-'}
                       </td>
-                      <td className="px-5 py-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Link
-                            className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 shadow-[0_0_10px_rgba(37,99,235,0.3)] transition-colors"
-                            href={workbenchHref}
-                            title="Open the Control Workbench to manage evidence, testing, risks, and audit readiness"
-                          >
-                            Open Control
-                          </Link>
-                        </div>
+                      <td className="px-6 py-4 text-right">
+                        <Link
+                          href={workbenchHref}
+                          title="Open the Control Workbench to manage evidence, testing, risks, and audit readiness"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-secondary)] text-[var(--text-primary)] text-xs font-medium rounded-lg hover:bg-[var(--bg-tertiary)] border border-[var(--card-border)] transition-colors"
+                        >
+                          Open
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
                       </td>
                     </tr>
                   );
                 })}
                 {!controls.length ? (
                   <tr>
-                    <td className="px-5 py-6 text-[var(--text-secondary)]" colSpan={8}>
+                    <td className="px-6 py-12 text-center text-[var(--text-secondary)]" colSpan={8}>
                       No controls returned for this framework.
                     </td>
                   </tr>

@@ -2,13 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ExternalLink, Search, Filter } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { ExternalLink, Search, Filter, FileCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useCompliance } from '@/contexts/ComplianceContext';
 import { Loading } from '@/components/ui/Loading';
+import { PageHeader } from '@/components/PageHeader';
 
 type EvidenceRow = {
   evidence_id: string;
@@ -63,11 +62,20 @@ function readCookie(name: string): string | null {
   }
 }
 
-function statusVariant(status: string) {
+function statusVariant(status: string): 'success' | 'warning' | 'danger' | 'info' | 'neutral' {
   if (status === 'approved') return 'success';
-  if (status === 'rejected') return 'danger';
-  if (status === 'pending' || status === 'needs_review') return 'warning';
+  if (status === 'rejected' || status === 'expired') return 'danger';
+  if (status === 'needs_review' || status === 'pending') return 'warning';
   return 'neutral';
+}
+
+function statusLabel(status: string): string {
+  if (status === 'needs_review') return 'Needs Review';
+  if (status === 'approved') return 'Approved';
+  if (status === 'rejected') return 'Rejected';
+  if (status === 'pending') return 'Pending';
+  if (status === 'expired') return 'Expired';
+  return status.replace(/_/g, ' ');
 }
 
 export default function EvidenceCollectionPage() {
@@ -185,55 +193,49 @@ export default function EvidenceCollectionPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
-        <div>
-          <nav className="text-xs text-[var(--text-secondary)] mb-2">
-            <span>GRC / Compliance</span> <span className="px-1">/</span> <span className="text-[var(--text-primary)]">Evidence Collection</span>
-          </nav>
-          <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">Evidence Collection</h1>
-          <p className="text-sm text-[var(--text-secondary)] mt-2">
-            Collected evidence from connected systems. Open a control to review and accept evidence for an audit period.
-          </p>
-        </div>
+      <PageHeader
+        title="Evidence Collection"
+        description="Collected evidence from connected systems. Open a control to review and accept evidence for an audit period."
+        icon={FileCheck}
+        breadcrumbs={[
+          { label: 'GRC / Compliance' },
+          { label: 'Evidence Collection' },
+        ]}
+        stats={[
+          { label: 'Total', value: stats?.total_evidence ?? 0 },
+          { label: 'Needs Review', value: stats?.needs_review ?? 0 },
+        ]}
+      />
+
+      <div className="max-w-[1600px] mx-auto px-8 py-8 space-y-8">
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm">
-            <div className="text-sm text-[var(--text-secondary)]">Total Evidence</div>
-            <div className="text-3xl font-bold mt-2 text-[var(--text-primary)]">{stats?.total_evidence?.toLocaleString() || 0}</div>
-            <div className="text-sm text-[var(--text-tertiary)] mt-1">Collected items</div>
-          </Card>
-          <Card className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm">
-            <div className="text-sm text-[var(--text-secondary)]">Approved</div>
-            <div className="text-3xl font-bold mt-2 text-green-600 dark:text-green-400">{stats?.approved?.toLocaleString() || 0}</div>
-            <div className="text-sm text-[var(--text-tertiary)] mt-1">Accepted evidence</div>
-          </Card>
-          <Card className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm">
-            <div className="text-sm text-[var(--text-secondary)]">Needs Review</div>
-            <div className="text-3xl font-bold mt-2 text-amber-600 dark:text-amber-400">{stats?.needs_review?.toLocaleString() || 0}</div>
-            <div className="text-sm text-[var(--text-tertiary)] mt-1">Awaiting approval</div>
-          </Card>
-          <Card className="p-6 bg-[var(--card-bg)] border border-[var(--card-border)] shadow-sm">
-            <div className="text-sm text-[var(--text-secondary)]">Rejected</div>
-            <div className="text-3xl font-bold mt-2 text-red-600 dark:text-red-400">{stats?.rejected?.toLocaleString() || 0}</div>
-            <div className="text-sm text-[var(--text-tertiary)] mt-1">Needs attention</div>
-          </Card>
+          {[
+            { label: 'Total Evidence', value: stats?.total_evidence, sub: 'Collected items', color: 'blue' },
+            { label: 'Approved', value: stats?.approved, sub: 'Accepted evidence', color: 'green' },
+            { label: 'Needs Review', value: stats?.needs_review, sub: 'Awaiting approval', color: 'orange' },
+            { label: 'Rejected', value: stats?.rejected, sub: 'Needs attention', color: 'red' },
+          ].map(({ label, value, sub, color }) => (
+            <div key={label} className={`rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur-md border-l-4 border-l-${color}-500`}>
+              <div className="text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)] mb-1">{label}</div>
+              <div className={`text-3xl font-bold text-${color}-400`}>{(value ?? 0).toLocaleString()}</div>
+              <div className="text-xs text-[var(--text-secondary)] mt-1">{sub}</div>
+            </div>
+          ))}
         </div>
 
-        <div className="flex flex-wrap gap-4 items-center justify-between">
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-4 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex gap-3 flex-wrap">
             <div className="relative">
               <select
                 value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setPage(1);
-                }}
+                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
                 className="appearance-none border border-[var(--card-border)] rounded-lg px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
               >
-                <option value="all">All Status</option>
-                <option value="needs_review">Needs Review</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
+                <option value="all" className="bg-[var(--bg-primary)]">All Status</option>
+                <option value="needs_review" className="bg-[var(--bg-primary)]">Needs Review</option>
+                <option value="approved" className="bg-[var(--bg-primary)]">Approved</option>
+                <option value="rejected" className="bg-[var(--bg-primary)]">Rejected</option>
               </select>
               <Filter className="absolute right-2.5 top-2.5 h-4 w-4 text-[var(--text-secondary)] pointer-events-none" />
             </div>
@@ -241,15 +243,12 @@ export default function EvidenceCollectionPage() {
             <div className="relative">
               <select
                 value={sourceFilter}
-                onChange={(e) => {
-                  setSourceFilter(e.target.value);
-                  setPage(1);
-                }}
+                onChange={(e) => { setSourceFilter(e.target.value); setPage(1); }}
                 className="appearance-none border border-[var(--card-border)] rounded-lg px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
               >
-                <option value="all">All Sources</option>
-                <option value="wazuh_indexer">Wazuh</option>
-                <option value="securewise.risk_autogen">Risk Autogen</option>
+                <option value="all" className="bg-[var(--bg-primary)]">All Sources</option>
+                <option value="wazuh_indexer" className="bg-[var(--bg-primary)]">Wazuh</option>
+                <option value="securewise.risk_autogen" className="bg-[var(--bg-primary)]">Risk Autogen</option>
               </select>
               <Filter className="absolute right-2.5 top-2.5 h-4 w-4 text-[var(--text-secondary)] pointer-events-none" />
             </div>
@@ -259,10 +258,7 @@ export default function EvidenceCollectionPage() {
                 type="text"
                 placeholder="Search evidence..."
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setPage(1);
-                }}
+                onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
                 className="border border-[var(--card-border)] rounded-lg px-3 py-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] pl-9 w-64 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"
               />
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-[var(--text-secondary)]" />
@@ -270,18 +266,24 @@ export default function EvidenceCollectionPage() {
           </div>
 
           {selectedItems.size > 0 ? (
-            <div className="text-xs text-[var(--text-secondary)]">
+            <div className="text-xs text-[var(--accent-blue)] font-medium">
               {selectedItems.size} selected · Open a control to review evidence
             </div>
           ) : null}
         </div>
 
-        <div className="border border-[var(--card-border)] rounded-lg overflow-hidden bg-[var(--card-bg)] shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-[var(--bg-secondary)] border-b border-[var(--card-border)] text-[var(--text-secondary)]">
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl overflow-hidden shadow-sm">
+          <div className="p-5 border-b border-[var(--card-border)] flex items-center justify-between">
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Evidence Ledger</h3>
+            <span className="text-xs font-medium text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-3 py-1 rounded-full border border-[var(--card-border)]">
+              {evidence.length} items
+            </span>
+          </div>
+          <div className="overflow-x-auto" style={{ overflowY: 'visible' }}>
+            <table className="w-full text-sm text-left" style={{ borderCollapse: 'separate', borderSpacing: 0 }}>
+              <thead className="bg-[var(--bg-secondary)] text-[var(--text-secondary)] font-medium border-b border-[var(--card-border)]">
                 <tr>
-                  <th className="p-3 text-left w-10">
+                  <th className="px-4 py-3 w-10">
                     <input
                       type="checkbox"
                       className="rounded border-[var(--card-border)] bg-[var(--bg-primary)] text-[var(--accent-blue)] focus:ring-[var(--accent-blue)]"
@@ -295,15 +297,13 @@ export default function EvidenceCollectionPage() {
                       checked={selectedItems.size > 0 && selectedItems.size === evidence.length}
                     />
                   </th>
-                  <th className="p-3 text-left font-medium">Evidence ID</th>
-                  <th className="p-3 text-left font-medium">Control</th>
-                  <th className="p-3 text-left font-medium">Framework</th>
-                  <th className="p-3 text-left font-medium">Source</th>
-                  <th className="p-3 text-left font-medium">Captured</th>
-                  <th className="p-3 text-left font-medium">Status</th>
-                  <th className="px-4 py-3 text-right font-medium uppercase tracking-wider">
-                    Actions
-                  </th>
+                  <th className="px-4 py-3 text-xs uppercase tracking-wider">Evidence ID</th>
+                  <th className="px-4 py-3 text-xs uppercase tracking-wider">Control</th>
+                  <th className="px-4 py-3 text-xs uppercase tracking-wider">Framework</th>
+                  <th className="px-4 py-3 text-xs uppercase tracking-wider">Source</th>
+                  <th className="px-4 py-3 text-xs uppercase tracking-wider">Captured</th>
+                  <th className="px-4 py-3 text-xs uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-xs uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--card-border)]">
@@ -317,8 +317,8 @@ export default function EvidenceCollectionPage() {
                   evidence.map((row) => {
                     const status = String(row.approval_status || 'needs_review');
                     return (
-                      <tr key={row.evidence_id} className="hover:bg-[var(--bg-secondary)] transition-colors">
-                        <td className="p-3">
+                      <tr key={row.evidence_id} className="hover:bg-[var(--bg-secondary)] transition-colors group">
+                        <td className="px-4 py-3">
                           <input
                             type="checkbox"
                             className="rounded border-[var(--card-border)] bg-[var(--bg-primary)] text-[var(--accent-blue)] focus:ring-[var(--accent-blue)]"
@@ -326,44 +326,40 @@ export default function EvidenceCollectionPage() {
                             onChange={() => toggleSelection(row.evidence_id)}
                           />
                         </td>
-                        <td className="p-3 font-mono text-xs text-[var(--accent-blue)]">{row.evidence_id.slice(0, 8)}...</td>
-                        <td className="p-3">
-                          <div className="font-medium text-[var(--text-primary)]">{row.control_id}</div>
-                          <div className="text-xs text-[var(--text-secondary)] line-clamp-1">{row.control_title || '-'}</div>
+                        <td className="px-4 py-3 font-mono text-xs text-[var(--accent-blue)]">{row.evidence_id.slice(0, 8)}...</td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-[var(--text-primary)] text-xs">{row.control_id}</div>
+                          <div className="text-xs text-[var(--text-secondary)] line-clamp-1 group-hover:text-[var(--text-primary)] transition-colors">{row.control_title || '-'}</div>
                         </td>
-                        <td className="p-3">
-                          <span className="px-2 py-0.5 bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)] rounded text-xs uppercase font-medium">
+                        <td className="px-4 py-3">
+                          <span className="inline-flex px-2 py-0.5 bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] rounded text-xs uppercase font-medium">
                             {row.framework || 'n/a'}
                           </span>
                         </td>
-                        <td className="p-3 text-sm text-[var(--text-primary)]">{row.source || '-'}</td>
-                        <td className="p-3 text-sm text-[var(--text-secondary)]">
+                        <td className="px-4 py-3 text-xs text-[var(--text-secondary)]">{row.source || '-'}</td>
+                        <td className="px-4 py-3 text-xs text-[var(--text-secondary)]">
                           {row.captured_at ? new Date(row.captured_at).toLocaleDateString() : '-'}
                         </td>
-                        <td className="p-3">
-                          <Badge variant={statusVariant(status)}>{status.replace('_', ' ')}</Badge>
+                        <td className="px-4 py-3">
+                          <Badge variant={statusVariant(status)}>{statusLabel(status)}</Badge>
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-1.5">
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
+                                <button
                                   onClick={() => router.push(`/compliance/evidence-collection/${row.evidence_id}`)}
-                                  className="text-xs h-8 px-2"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-xs font-medium rounded-lg hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors"
                                 >
                                   View
-                                </Button>
+                                </button>
                               </TooltipTrigger>
                               <TooltipContent>View Details</TooltipContent>
                             </Tooltip>
 
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
+                                <button
                                   onClick={() => {
                                     const params = new URLSearchParams({
                                       framework: row.framework || 'iso27001',
@@ -371,39 +367,32 @@ export default function EvidenceCollectionPage() {
                                     });
                                     router.push(`/compliance/controls/${row.control_id}/workbench?${params.toString()}`);
                                   }}
-                                  className="text-xs h-8 px-2"
+                                  className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-xs font-medium rounded-lg hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors"
                                 >
                                   Control
-                                </Button>
+                                </button>
                               </TooltipTrigger>
-                              <TooltipContent>
-                                Open Control Workbench
-                              </TooltipContent>
+                              <TooltipContent>Open Control Workbench</TooltipContent>
                             </Tooltip>
 
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
+                                <button
                                   disabled={!row.source_ref}
                                   onClick={() => {
                                     if (!row.source_ref) return;
                                     window.open(row.source_ref, '_blank', 'noopener,noreferrer');
                                   }}
-                                  className="text-xs h-8 px-2"
+                                  className="inline-flex items-center gap-1 p-1.5 bg-[var(--bg-secondary)] text-[var(--text-secondary)] text-xs font-medium rounded-lg hover:bg-[rgba(255,255,255,0.08)] hover:text-[var(--accent-blue)] border border-[var(--card-border)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
-                                  <ExternalLink className="w-3 h-3" />
-                                </Button>
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </button>
                               </TooltipTrigger>
-                              <TooltipContent>
-                                {row.source_ref
-                                  ? 'Open Source'
-                                  : 'No source link'}
-                              </TooltipContent>
+                              <TooltipContent>{row.source_ref ? 'Open Source' : 'No source link'}</TooltipContent>
                             </Tooltip>
                           </div>
                         </td>
+
                       </tr>
                     );
                   })
@@ -413,22 +402,23 @@ export default function EvidenceCollectionPage() {
           </div>
         </div>
 
-        <div className="flex justify-between items-center bg-[var(--card-bg)] border border-[var(--card-border)] rounded-lg p-3 shadow-sm">
-          <div className="text-sm text-[var(--text-secondary)]">
-            Page {page} of {totalPages}
-          </div>
+        <div className="flex justify-between items-center bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-4 shadow-sm">
+          <div className="text-sm text-[var(--text-secondary)]">Page {page} of {totalPages}</div>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+            <button
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--card-border)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.06)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
               Previous
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
+            </button>
+            <button
               disabled={page === totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--card-border)] bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[rgba(255,255,255,0.06)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Next
-            </Button>
+            </button>
           </div>
         </div>
       </div>

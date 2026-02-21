@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useCompliance } from '@/contexts/ComplianceContext';
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PageHeader } from '@/components/PageHeader';
+import { BookOpen, Search, ChevronDown } from 'lucide-react';
 
 interface AuditLog {
   id: string;
@@ -21,6 +22,21 @@ interface AuditLog {
   success: boolean;
   error_message?: string;
 }
+
+// Map action → badge variant
+function actionVariant(action: string): 'success' | 'danger' | 'warning' | 'info' | 'neutral' {
+  if (action.includes('approve') || action.includes('create')) return 'success';
+  if (action.includes('reject')) return 'danger';
+  if (action.includes('submit') || action.includes('bulk')) return 'warning';
+  if (action.includes('review') || action.includes('map')) return 'info';
+  return 'neutral';
+}
+
+function actionLabel(action: string) {
+  return String(action || '').replace('evidence.', '').replace(/_/g, ' ');
+}
+
+const inputCls = 'w-full rounded-lg border border-[var(--card-border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)] placeholder:text-[var(--text-tertiary)]';
 
 export default function EvidenceLedgerPage() {
   const { framework, periodId } = useCompliance();
@@ -42,24 +58,16 @@ export default function EvidenceLedgerPage() {
   async function loadLogs() {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        action_category: 'evidence',
-        limit: '100',
-      });
-
+      const params = new URLSearchParams({ action_category: 'evidence', limit: '100' });
       if (actionFilter !== 'all') params.append('action', actionFilter);
       if (userFilter) params.append('user_email', userFilter);
       if (targetIdFilter) params.append('target_id', targetIdFilter);
       if (dateFrom) params.append('date_from', dateFrom);
       if (dateTo) params.append('date_to', dateTo);
 
-      const res = await fetch(`/api/audit-logs?${params.toString()}`, {
-        credentials: 'include',
-      });
-
+      const res = await fetch(`/api/audit-logs?${params.toString()}`, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to load audit logs');
       const data = await res.json();
-
       setLogs(data.logs || []);
       setTotal(data.total || 0);
     } catch (err) {
@@ -70,145 +78,173 @@ export default function EvidenceLedgerPage() {
     }
   }
 
-  const actionColors: Record<string, string> = {
-    'evidence.create': 'bg-blue-100 text-blue-700',
-    'evidence.review': 'bg-purple-100 text-purple-700',
-    'evidence.approve': 'bg-green-100 text-green-700',
-    'evidence.reject': 'bg-red-100 text-red-700',
-    'evidence.submit': 'bg-yellow-100 text-yellow-700',
-    'evidence.map_control': 'bg-cyan-100 text-cyan-700',
-    'evidence.unmap_control': 'bg-slate-100 text-slate-600',
-    'evidence.bulk_review': 'bg-purple-100 text-purple-700',
-  };
-
-  if (loading) {
-    return <div className="p-8">Loading evidence ledger...</div>;
-  }
-
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Evidence Ledger</h1>
-        <p className="text-sm text-slate-600 mt-1">
-          Complete audit trail of evidence operations ({total} total events)
-        </p>
-        <div className="text-xs text-slate-500 mt-2">
-          Framework: {framework.toUpperCase()}
-          {periodId ? ` · Period: ${periodId}` : ' · Period: All time'}
+    <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <PageHeader
+        title="Evidence Ledger"
+        description="Complete immutable audit trail of all evidence operations."
+        icon={BookOpen}
+        breadcrumbs={[
+          { label: 'GRC / Compliance' },
+          { label: 'Evidence Ledger' },
+        ]}
+        stats={[
+          { label: 'Total Events', value: total },
+          { label: 'Showing', value: logs.length },
+        ]}
+      />
+
+      <div className="max-w-[1400px] mx-auto px-8 py-8 space-y-6">
+
+        {/* Context strip */}
+        <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+          <span className="px-2 py-0.5 rounded-full bg-[var(--bg-secondary)] border border-[var(--card-border)] font-medium uppercase tracking-wider">
+            {framework.toUpperCase()}
+          </span>
+          <span className="opacity-40">/</span>
+          <span>{periodId ? `Period: ${periodId}` : 'All time'}</span>
         </div>
-      </div>
 
-      <Card className="p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Action</label>
-            <select
-              value={actionFilter}
-              onChange={(e) => setActionFilter(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
-            >
-              <option value="all">All Actions</option>
-              <option value="evidence.create">Create</option>
-              <option value="evidence.review">Review</option>
-              <option value="evidence.approve">Approve</option>
-              <option value="evidence.reject">Reject</option>
-              <option value="evidence.submit">Submit</option>
-              <option value="evidence.map_control">Map Control</option>
-              <option value="evidence.unmap_control">Unmap Control</option>
-              <option value="evidence.bulk_review">Bulk Review</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">User</label>
-            <input
-              type="text"
-              value={userFilter}
-              onChange={(e) => setUserFilter(e.target.value)}
-              placeholder="Search by email"
-              className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Evidence ID</label>
-            <input
-              type="text"
-              value={targetIdFilter}
-              onChange={(e) => setTargetIdFilter(e.target.value)}
-              placeholder="Filter by ID"
-              className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">From Date</label>
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">To Date</label>
-            <input
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="w-full border border-slate-300 rounded px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
-      </Card>
-
-      <div className="space-y-4">
-        {logs.length === 0 ? (
-          <Card className="p-8 text-center text-slate-500">No audit logs found matching the selected filters.</Card>
-        ) : (
-          logs.map((log) => (
-            <Card key={log.id} className="p-4">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Badge className={actionColors[log.action] || 'bg-slate-100 text-slate-600'}>
-                      {String(log.action || '').replace('evidence.', '')}
-                    </Badge>
-                    <span className="text-sm text-slate-600">{new Date(log.created_at).toLocaleString()}</span>
-                    <span className="text-sm text-slate-600">by {log.user_email || 'unknown'}</span>
-                  </div>
-
-                  <p className="text-sm text-slate-900 mb-2">{log.action_description}</p>
-
-                  <div className="flex items-center gap-4 text-xs text-slate-500">
-                    <span>Evidence: {String(log.target_id || '').slice(0, 8)}...</span>
-                    {log.target_name ? <span>Control: {log.target_name}</span> : null}
-                  </div>
-
-                  {log.changes && Object.keys(log.changes).length > 0 ? (
-                    <div className="mt-3 p-2 bg-slate-50 rounded text-xs">
-                      <span className="font-medium">Changes:</span>
-                      <pre className="mt-1 text-slate-600 whitespace-pre-wrap">{JSON.stringify(log.changes, null, 2)}</pre>
-                    </div>
-                  ) : null}
-
-                  {log.after_state && Object.keys(log.after_state).length > 0 ? (
-                    <details className="mt-2">
-                      <summary className="text-xs text-blue-600 cursor-pointer">View Details</summary>
-                      <pre className="mt-2 p-2 bg-slate-50 rounded text-xs text-slate-600 whitespace-pre-wrap">
-                        {JSON.stringify(log.after_state, null, 2)}
-                      </pre>
-                    </details>
-                  ) : null}
-                </div>
-
-                {!log.success ? <Badge className="bg-red-100 text-red-700">Failed</Badge> : null}
+        {/* Filters */}
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl p-5">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {/* Action */}
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Action</label>
+              <div className="relative">
+                <select
+                  value={actionFilter}
+                  onChange={(e) => setActionFilter(e.target.value)}
+                  className={`appearance-none ${inputCls} pr-8`}
+                >
+                  <option value="all" className="bg-[var(--bg-primary)]">All Actions</option>
+                  <option value="evidence.create" className="bg-[var(--bg-primary)]">Create</option>
+                  <option value="evidence.review" className="bg-[var(--bg-primary)]">Review</option>
+                  <option value="evidence.approve" className="bg-[var(--bg-primary)]">Approve</option>
+                  <option value="evidence.reject" className="bg-[var(--bg-primary)]">Reject</option>
+                  <option value="evidence.submit" className="bg-[var(--bg-primary)]">Submit</option>
+                  <option value="evidence.map_control" className="bg-[var(--bg-primary)]">Map Control</option>
+                  <option value="evidence.unmap_control" className="bg-[var(--bg-primary)]">Unmap Control</option>
+                  <option value="evidence.bulk_review" className="bg-[var(--bg-primary)]">Bulk Review</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-3.5 w-3.5 text-[var(--text-secondary)]" />
               </div>
-            </Card>
-          ))
-        )}
+            </div>
+
+            {/* User */}
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">User</label>
+              <div className="relative">
+                <input type="text" value={userFilter} onChange={(e) => setUserFilter(e.target.value)} placeholder="Search by email" className={inputCls + ' pl-9'} />
+                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-[var(--text-secondary)]" />
+              </div>
+            </div>
+
+            {/* Evidence ID */}
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Evidence ID</label>
+              <input type="text" value={targetIdFilter} onChange={(e) => setTargetIdFilter(e.target.value)} placeholder="Filter by ID" className={inputCls} />
+            </div>
+
+            {/* From */}
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">From Date</label>
+              <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className={inputCls + ' [color-scheme:dark]'} />
+            </div>
+
+            {/* To */}
+            <div>
+              <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">To Date</label>
+              <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className={inputCls + ' [color-scheme:dark]'} />
+            </div>
+          </div>
+        </div>
+
+        {/* Log list */}
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl overflow-hidden shadow-sm">
+          <div className="p-5 border-b border-[var(--card-border)] flex items-center justify-between">
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Audit Events</h3>
+            <span className="text-xs font-medium text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-3 py-1 rounded-full border border-[var(--card-border)]">
+              {logs.length} of {total} events
+            </span>
+          </div>
+
+          {loading ? (
+            <div className="p-12 text-center text-sm text-[var(--text-secondary)] animate-pulse">
+              Loading evidence ledger…
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="p-12 text-center text-[var(--text-secondary)]">
+              No audit logs found matching the selected filters.
+            </div>
+          ) : (
+            <div className="divide-y divide-[var(--card-border)]">
+              {logs.map((log) => (
+                <div key={log.id} className="p-5 hover:bg-[var(--bg-secondary)] transition-colors">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      {/* Action row */}
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <Badge variant={actionVariant(log.action)} className="capitalize">
+                          {actionLabel(log.action)}
+                        </Badge>
+                        {!log.success && (
+                          <Badge variant="danger">Failed</Badge>
+                        )}
+                        <span className="text-xs text-[var(--text-secondary)]">
+                          {new Date(log.created_at).toLocaleString()}
+                        </span>
+                        <span className="text-xs text-[var(--text-secondary)]">
+                          by <span className="text-[var(--accent-blue)]">{log.user_email || 'unknown'}</span>
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-sm text-[var(--text-primary)] mb-2">{log.action_description}</p>
+
+                      {/* Meta */}
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--text-tertiary)]">
+                        <span>Evidence: <span className="font-mono text-[var(--accent-blue)]">{String(log.target_id || '').slice(0, 8)}…</span></span>
+                        {log.target_name && <span>Control: <span className="text-[var(--text-secondary)]">{log.target_name}</span></span>}
+                      </div>
+
+                      {/* Changes diff */}
+                      {log.changes && Object.keys(log.changes).length > 0 && (
+                        <div className="mt-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] p-3 text-xs">
+                          <span className="font-semibold text-[var(--text-secondary)] uppercase tracking-wide">Changes</span>
+                          <pre className="mt-1 text-[var(--text-secondary)] whitespace-pre-wrap font-mono leading-relaxed">
+                            {JSON.stringify(log.changes, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+
+                      {/* After state expandable */}
+                      {log.after_state && Object.keys(log.after_state).length > 0 && (
+                        <details className="mt-2 group">
+                          <summary className="text-xs text-[var(--accent-blue)] cursor-pointer hover:underline select-none list-none flex items-center gap-1">
+                            <ChevronDown className="w-3 h-3 group-open:rotate-180 transition-transform" />
+                            View after state
+                          </summary>
+                          <pre className="mt-2 p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] text-xs text-[var(--text-secondary)] whitespace-pre-wrap font-mono leading-relaxed">
+                            {JSON.stringify(log.after_state, null, 2)}
+                          </pre>
+                        </details>
+                      )}
+
+                      {/* Error */}
+                      {log.error_message && (
+                        <div className="mt-2 text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                          {log.error_message}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -9,7 +9,7 @@ function join(...parts: Array<string | undefined>) {
 export const Card = React.forwardRef<HTMLDivElement, DivProps>(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={join('rounded-lg border border-gray-200 bg-white text-gray-900 shadow-sm', className)}
+    className={join('rounded-lg border bg-[var(--card-bg)] text-[var(--text-primary)] border-[var(--card-border)] shadow-sm', className)}
     {...props}
   />
 ));
@@ -29,7 +29,7 @@ CardTitle.displayName = 'CardTitle';
 
 export const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
   ({ className, ...props }, ref) => (
-    <p ref={ref} className={join('text-sm text-gray-600', className)} {...props} />
+    <p ref={ref} className={join('text-sm text-[var(--text-secondary)]', className)} {...props} />
   )
 );
 CardDescription.displayName = 'CardDescription';

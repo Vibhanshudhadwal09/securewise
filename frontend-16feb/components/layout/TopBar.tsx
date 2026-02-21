@@ -168,7 +168,7 @@ export function TopBar() {
               value={tenantId}
               showSearch
               className="custom-select"
-              popupClassName="custom-select-dropdown"
+              classNames={{ popup: { root: 'custom-select-dropdown' } }}
               options={[
                 { label: 'Demo Tenant (demo-tenant)', value: 'demo-tenant' },
                 ...tenants.map((t) => ({ label: `${t.name} (${t.tenant_id})`, value: t.tenant_id })),
@@ -180,7 +180,7 @@ export function TopBar() {
               style={{ width: 160 }}
               value={range}
               className="custom-select"
-              popupClassName="custom-select-dropdown"
+              classNames={{ popup: { root: 'custom-select-dropdown' } }}
               options={[
                 { label: 'Last 1h', value: '1h' },
                 { label: 'Last 24h', value: '24h' },

@@ -78,7 +78,17 @@ module.exports = {
         },
       },
       fontFamily: {
-        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['var(--font-mono)', '"JetBrains Mono"', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+      },
+      spacing: {
+        '24': '24px', // Card padding
+        '32': '32px', // Section spacing
+        '60': '240px', // Sidebar width approximation -> use strict classes or vars, but 60 is 15rem (=240px)
+        'sidebar': '240px',
+      },
+      maxWidth: {
+        'content': '1440px',
       },
     },
   },

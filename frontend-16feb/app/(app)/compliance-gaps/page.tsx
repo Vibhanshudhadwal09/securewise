@@ -116,11 +116,11 @@ export default function ComplianceGapsPage() {
   const openCount = useMemo(() => gaps.filter((g) => g.status === 'open').length, [gaps]);
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-8 space-y-6 bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Compliance Gap Analysis</h1>
-          <p className="text-sm text-gray-600 mt-1">Identify missing controls, stale evidence, and remediation priorities.</p>
+          <p className="text-sm text-[var(--text-secondary)] mt-1">Identify missing controls, stale evidence, and remediation priorities.</p>
         </div>
         <Button onClick={runAnalysis} loading={analyzing}>
           Run Analysis
@@ -130,7 +130,7 @@ export default function ComplianceGapsPage() {
       <Card className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <div className="text-sm text-gray-600">Framework</div>
-          <select className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={framework} onChange={(e) => setFramework(e.target.value)}>
+          <select className="mt-1 w-full rounded-md border px-3 py-2 text-sm bg-[var(--card-bg)] text-[var(--text-primary)] border-[var(--card-border)]" value={framework} onChange={(e) => setFramework(e.target.value)}>
             <option value="iso27001">ISO 27001</option>
             <option value="soc2">SOC 2</option>
           </select>
@@ -147,7 +147,7 @@ export default function ComplianceGapsPage() {
         </div>
         <div>
           <div className="text-sm text-gray-600">Severity</div>
-          <select className="mt-1 w-full rounded-md border px-3 py-2 text-sm" value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}>
+          <select className="mt-1 w-full rounded-md border px-3 py-2 text-sm bg-[var(--card-bg)] text-[var(--text-primary)] border-[var(--card-border)]" value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}>
             <option value="all">All</option>
             <option value="critical">Critical</option>
             <option value="high">High</option>
@@ -167,15 +167,15 @@ export default function ComplianceGapsPage() {
         </div>
       </Card>
 
-      <div className="text-sm text-gray-600">Open gaps: {openCount}</div>
+      <div className="text-sm text-[var(--text-secondary)]">Open gaps: {openCount}</div>
 
-      {error ? <div className="text-sm text-red-600">{error}</div> : null}
+      {error ? <div className="text-sm text-red-400">{error}</div> : null}
 
       <div className="space-y-3">
         {loading ? (
           <Loading />
         ) : gaps.length === 0 ? (
-          <Card className="p-8 text-center text-gray-500">No gaps found. Run analysis to identify compliance gaps.</Card>
+          <Card className="p-8 text-center text-[var(--text-secondary)]">No gaps found. Run analysis to identify compliance gaps.</Card>
         ) : (
           gaps.map((gap) => (
             <Card key={gap.id} className="p-4 space-y-3">
@@ -188,13 +188,11 @@ export default function ComplianceGapsPage() {
                     </span>
                     {gap.gap_type ? <Badge variant="neutral">{gap.gap_type.replace('_', ' ')}</Badge> : null}
                   </div>
-                  <div className="text-sm text-gray-700 mt-2">{gap.gap_description}</div>
-                  {gap.suggested_remediation ? (
-                    <div className="text-sm mt-2 bg-blue-50 p-2 rounded">
+                  <div className="text-sm text-[var(--text-secondary)] mt-2">{gap.gap_description}</div>
+                    <div className="text-sm mt-2 bg-[var(--bg-secondary)] p-2 rounded">
                       <strong>Suggested Remediation:</strong> {gap.suggested_remediation}
                     </div>
-                  ) : null}
-                  <div className="text-xs text-gray-500 mt-2">
+                  <div className="text-xs text-[var(--text-tertiary)] mt-2">
                     Risk Score: {gap.risk_score ?? 'n/a'} | Created:{' '}
                     {gap.created_at ? new Date(gap.created_at).toLocaleDateString() : 'n/a'}
                   </div>
@@ -219,9 +217,9 @@ export default function ComplianceGapsPage() {
                 <div className="border-t pt-3 space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium">Resolution Status</label>
+                      <label className="text-sm font-medium text-[var(--text-primary)]">Resolution Status</label>
                       <select
-                        className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                        className="mt-1 w-full rounded-md border px-3 py-2 text-sm bg-[var(--card-bg)] text-[var(--text-primary)] border-[var(--card-border)]"
                         value={resolutionStatus}
                         onChange={(e) => setResolutionStatus(e.target.value as typeof resolutionStatus)}
                       >
@@ -231,9 +229,9 @@ export default function ComplianceGapsPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-sm font-medium">Resolution Notes</label>
+                      <label className="text-sm font-medium text-[var(--text-primary)]">Resolution Notes</label>
                       <input
-                        className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
+                        className="mt-1 w-full rounded-md border px-3 py-2 text-sm bg-[var(--card-bg)] text-[var(--text-primary)] border-[var(--card-border)]"
                         value={resolutionNotes}
                         onChange={(e) => setResolutionNotes(e.target.value)}
                       />

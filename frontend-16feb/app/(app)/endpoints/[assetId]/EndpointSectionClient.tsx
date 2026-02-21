@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Alert, Card, Skeleton, Space, Typography } from 'antd';
+import { Alert, Card, Skeleton, Space, Typography, ConfigProvider, theme } from 'antd';
 import { useSearchParams } from 'next/navigation';
 import useSWRInfinite from 'swr/infinite';
 import { useShell } from '../../../../components/layout/AppShell';
@@ -182,56 +182,77 @@ export function EndpointSectionClient(
   const summary = useMemo(() => buildSummaryFromAlerts(modeFiltered, partialAny), [modeFiltered, partialAny]);
 
   return (
-    <main style={{ padding: 6 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'baseline' }}>
-        <div>
-          <Typography.Title level={3} style={{ margin: 0 }}>
-            {props.assetId ? (
-              <>
-                Endpoint: <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{props.assetId}</span>
-              </>
-            ) : (
-              <>All Endpoints</>
-            )}
-          </Typography.Title>
-          <Typography.Text type="secondary">
-            <b>{normalized.title}</b> • Range: <b>{String(range || '24h')}</b> • Showing most recent <b>50</b> per page
-          </Typography.Text>
+    <ConfigProvider
+      theme={{
+        algorithm: theme.darkAlgorithm,
+        token: {
+          colorBgContainer: 'var(--card-bg)',
+          colorBgElevated: 'var(--card-bg)',
+          colorText: 'var(--text-primary)',
+          colorTextSecondary: 'var(--text-secondary)',
+          colorBorder: 'var(--card-border)',
+          colorBgLayout: 'var(--bg-primary)',
+          colorBgBase: 'var(--bg-primary)',
+        },
+      }}
+    >
+      <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]" style={{ padding: 6 }}>
+        <div className="max-w-[1400px] w-full mx-auto px-6 py-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <Typography.Title level={3} style={{ margin: 0 }}>
+                {props.assetId ? (
+                  <>
+                    Endpoint: <span style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{props.assetId}</span>
+                  </>
+                ) : (
+                  <>All Endpoints</>
+                )}
+              </Typography.Title>
+              <Typography.Text type="secondary">
+                <b>{normalized.title}</b> • Range: <b>{String(range || '24h')}</b> • Showing most recent <b>50</b> per page
+              </Typography.Text>
+            </div>
+          </div>
+
+          {alertsErr ? (
+            <Alert style={{ marginTop: 12 }} type="warning" showIcon message="Signals are unavailable" description={String((alertsErr as any)?.message || alertsErr)} />
+          ) : null}
+
+          <div className="mb-2 mt-4">
+            <Typography.Title level={4} style={{ margin: 0 }}>Security Signals Summary</Typography.Title>
+          </div>
+
+          <div className="mb-6">
+            <SecuritySignalsKpiTiles summary={summary} loading={Boolean(alertsLoading)} rangeLabel={String(range || '24h')} />
+          </div>
+
+          <div className="mb-6">
+            <Card title="Recent security signals" size="small" className="!border-none !bg-[var(--card-bg)] !shadow-[var(--card-shadow)]">
+              {alertsLoading && !pages ? (
+                <Skeleton active />
+              ) : (
+                <div>
+                  {filteredAlerts.length === 0 ? (
+                    <div style={{ padding: 12 }}>
+                      <Typography.Text type="secondary">No signals found for this category (check range/tenant).</Typography.Text>
+                    </div>
+                  ) : null}
+                  <SecuritySignalsAlertsTable
+                    items={filteredAlerts}
+                    loading={Boolean(alertsLoading)}
+                    hasMore={Boolean(hasMore)}
+                    onLoadMore={() => void setSize(size + 1)}
+                    search={search}
+                    onSearchChange={setSearch}
+                  />
+                </div>
+              )}
+            </Card>
+          </div>
         </div>
       </div>
-
-      {alertsErr ? (
-        <Alert style={{ marginTop: 12 }} type="warning" showIcon message="Signals are unavailable" description={String((alertsErr as any)?.message || alertsErr)} />
-      ) : null}
-
-      <div style={{ marginTop: 12 }}>
-        <SecuritySignalsKpiTiles summary={summary} loading={Boolean(alertsLoading)} rangeLabel={String(range || '24h')} />
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <Card title="Recent security signals" size="small">
-          {alertsLoading && !pages ? (
-            <Skeleton active />
-          ) : (
-            <div>
-              {filteredAlerts.length === 0 ? (
-                <div style={{ padding: 12 }}>
-                  <Typography.Text type="secondary">No signals found for this category (check range/tenant).</Typography.Text>
-                </div>
-              ) : null}
-              <SecuritySignalsAlertsTable
-                items={filteredAlerts}
-                loading={Boolean(alertsLoading)}
-                hasMore={Boolean(hasMore)}
-                onLoadMore={() => void setSize(size + 1)}
-                search={search}
-                onSearchChange={setSearch}
-              />
-            </div>
-          )}
-        </Card>
-      </div>
-    </main>
+    </ConfigProvider>
   );
 }
 

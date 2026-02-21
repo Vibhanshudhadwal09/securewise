@@ -145,7 +145,10 @@ export default function DashboardPage() {
 
         {health?.partial ? <DataHealthBanner reasons={health.reasons} sources={health.sources} /> : null}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="mb-2 mt-4">
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">Executive KPIs</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <KpiCard
             title="Audit Readiness"
             value={isMissing(kpis.auditReadinessPct) ? '—' : `${kpis.auditReadinessPct}%`}
@@ -205,7 +208,12 @@ export default function DashboardPage() {
             actionTooltip="View security incidents"
             icon={Shield}
           />
-          {/* Merged second grid items */}
+        </div>
+
+        <div className="mb-2 mt-4">
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">Operational Metrics</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <KpiCard
             title="Controls Missing Evidence"
             value={dashValue(kpis.controlsMissingEvidence)}
@@ -282,6 +290,9 @@ export default function DashboardPage() {
           />
         </div>
 
+        <div className="mb-2 mt-8">
+          <h2 className="text-xl font-semibold text-[var(--text-primary)]">Priority Work Queue</h2>
+        </div>
         <PriorityWorkQueue items={tables?.priorityWorkQueue || []} />
       </div>
     </div>

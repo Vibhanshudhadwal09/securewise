@@ -25,14 +25,14 @@ function join(...parts: Array<string | undefined>) {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  default: 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm focus-visible:ring-primary-500',
-  primary: 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm focus-visible:ring-primary-500',
-  outline: 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus-visible:ring-primary-500',
-  ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus-visible:ring-primary-500',
-  secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus-visible:ring-primary-500',
-  destructive: 'text-error-600 hover:bg-error-50 focus-visible:ring-error-500',
-  danger: 'bg-error-600 text-white hover:bg-error-700 focus-visible:ring-error-500 shadow-sm',
-  success: 'bg-success-600 text-white hover:bg-success-700 focus-visible:ring-success-500 shadow-sm',
+  default: 'bg-[var(--accent-blue)] text-white hover:bg-blue-600 shadow-sm focus-visible:ring-[var(--accent-blue)]',
+  primary: 'bg-[var(--accent-blue)] text-white hover:bg-blue-600 shadow-sm focus-visible:ring-[var(--accent-blue)]',
+  outline: 'border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--card-bg-hover)] focus-visible:ring-[var(--accent-blue)]',
+  ghost: 'bg-transparent text-[var(--text-primary)] hover:bg-[var(--card-bg-hover)] focus-visible:ring-[var(--accent-blue)]',
+  secondary: 'bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--card-bg-hover)] focus-visible:ring-[var(--accent-blue)]',
+  destructive: 'text-[var(--accent-red)] hover:bg-red-50 focus-visible:ring-[var(--accent-red)]',
+  danger: 'bg-[var(--accent-red)] text-white hover:bg-red-700 focus-visible:ring-[var(--accent-red)] shadow-sm',
+  success: 'bg-[var(--accent-green)] text-white hover:bg-green-700 focus-visible:ring-[var(--accent-green)] shadow-sm',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { UserCheck, Shield } from 'lucide-react';
+import { PageHeader } from '@/components/PageHeader';
 
 type ControlRow = any;
 type AssignmentRow = any;
@@ -16,23 +18,48 @@ function readCookie(name: string): string | null {
   }
 }
 
+const users = [
+  { id: 'grc@example.com', name: 'GRC Team' },
+  { id: 'it-ops@example.com', name: 'IT Operations' },
+  { id: 'security@example.com', name: 'Security Team' },
+  { id: 'compliance@example.com', name: 'Compliance Team' },
+  { id: 'auditor@example.com', name: 'Internal Auditor' },
+];
+
+function UserSelect({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled: boolean;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      disabled={disabled}
+      className="w-full appearance-none rounded-lg border border-[var(--card-border)] bg-[var(--bg-secondary)] px-3 py-1.5 text-xs text-[var(--text-primary)] focus:border-[var(--accent-blue)] focus:outline-none disabled:opacity-50 transition-colors"
+    >
+      <option value="" className="bg-[var(--bg-primary)]">Unassigned</option>
+      {users.map((u) => (
+        <option key={u.id} value={u.id} className="bg-[var(--bg-primary)]">
+          {u.name}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export default function ControlAssignmentsPage() {
   const [controls, setControls] = useState<ControlRow[]>([]);
   const [assignments, setAssignments] = useState<Record<string, AssignmentRow>>({});
   const [loading, setLoading] = useState(false);
 
   const tenantId = useMemo(() => {
-    // Support both legacy localStorage usage and current cookie-based tenant.
     return window.localStorage.getItem('tenant') || readCookie('sw_tenant') || 'demo-tenant';
   }, []);
-
-  const users = [
-    { id: 'grc@example.com', name: 'GRC Team' },
-    { id: 'it-ops@example.com', name: 'IT Operations' },
-    { id: 'security@example.com', name: 'Security Team' },
-    { id: 'compliance@example.com', name: 'Compliance Team' },
-    { id: 'auditor@example.com', name: 'Internal Auditor' },
-  ];
 
   useEffect(() => {
     fetchControls();
@@ -62,7 +89,6 @@ export default function ControlAssignmentsPage() {
         credentials: 'include',
       });
       const data = (await res.json().catch(() => [])) as any[];
-
       const assignmentMap: Record<string, any> = {};
       for (const a of Array.isArray(data) ? data : []) {
         assignmentMap[String(a.control_id)] = a;
@@ -84,10 +110,7 @@ export default function ControlAssignmentsPage() {
           'x-tenant-id': tenantId,
         },
         credentials: 'include',
-        body: JSON.stringify({
-          control_id: controlId,
-          [role]: userId || null,
-        }),
+        body: JSON.stringify({ control_id: controlId, [role]: userId || null }),
       });
 
       if (!res.ok) {
@@ -96,7 +119,6 @@ export default function ControlAssignmentsPage() {
       }
 
       await fetchAssignments();
-      alert(`Control ${controlId} assigned successfully`);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Error assigning control:', err);
@@ -107,104 +129,123 @@ export default function ControlAssignmentsPage() {
   }
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1 style={{ marginTop: 0 }}>Control Assignments</h1>
-      <p style={{ color: '#6b7280', marginBottom: 24 }}>
-        Assign owners, reviewers, and testers to controls. Evidence requests will be auto-created for owners.
-      </p>
+    <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <PageHeader
+        title="Control Assignments"
+        description="Assign owners, reviewers, and testers to controls. Evidence requests will be auto-created for owners."
+        icon={UserCheck}
+        breadcrumbs={[
+          { label: 'GRC / Controls' },
+          { label: 'Assignments' },
+        ]}
+        stats={[
+          { label: 'Controls', value: controls.length },
+          { label: 'Assigned', value: Object.keys(assignments).length },
+        ]}
+      />
 
-      <div style={{ overflowX: 'auto', border: '1px solid #eee', borderRadius: 10, background: '#fff' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
-              <th style={{ textAlign: 'left', padding: 12 }}>Control</th>
-              <th style={{ textAlign: 'left', padding: 12 }}>Name</th>
-              <th style={{ textAlign: 'left', padding: 12 }}>Owner</th>
-              <th style={{ textAlign: 'left', padding: 12 }}>Reviewer</th>
-              <th style={{ textAlign: 'left', padding: 12 }}>Tester</th>
-            </tr>
-          </thead>
-          <tbody>
-            {controls.slice(0, 200).map((control: any) => {
-              const assignment = assignments[String(control.control_id)] || {};
-              return (
-                <tr key={String(control.control_id)} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>{String(control.control_id)}</td>
-                  <td style={{ padding: 12 }}>{String(control.title || control.name || '')}</td>
-                  <td style={{ padding: 12 }}>
-                    <select
-                      value={String(assignment.owner_user_id || '')}
-                      onChange={(e) => handleAssign(String(control.control_id), 'owner_user_id', e.target.value)}
-                      disabled={loading}
-                      style={{ padding: '4px 8px', border: '1px solid #d1d5db', borderRadius: 4, minWidth: 220 }}
-                    >
-                      <option value="">Unassigned</option>
-                      {users.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td style={{ padding: 12 }}>
-                    <select
-                      value={String(assignment.reviewer_user_id || '')}
-                      onChange={(e) => handleAssign(String(control.control_id), 'reviewer_user_id', e.target.value)}
-                      disabled={loading}
-                      style={{ padding: '4px 8px', border: '1px solid #d1d5db', borderRadius: 4, minWidth: 220 }}
-                    >
-                      <option value="">Unassigned</option>
-                      {users.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td style={{ padding: 12 }}>
-                    <select
-                      value={String(assignment.tester_user_id || '')}
-                      onChange={(e) => handleAssign(String(control.control_id), 'tester_user_id', e.target.value)}
-                      disabled={loading}
-                      style={{ padding: '4px 8px', border: '1px solid #d1d5db', borderRadius: 4, minWidth: 220 }}
-                    >
-                      <option value="">Unassigned</option>
-                      {users.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
+      <div className="p-8 space-y-6 max-w-[1600px] mx-auto w-full">
+
+        {/* Info Panel */}
+        <div className="rounded-xl border border-[var(--card-border)] bg-[var(--card-bg)] p-5 shadow-sm backdrop-blur-md">
+          <div className="flex items-center gap-2 mb-3">
+            <Shield className="w-4 h-4 text-[var(--accent-blue)]" />
+            <h3 className="text-sm font-semibold text-[var(--text-primary)] uppercase tracking-wide">Assignment Rules</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { role: 'Owner', color: 'blue', desc: 'Responsible for providing evidence. Auto-creates an evidence request on assignment.' },
+              { role: 'Reviewer', color: 'purple', desc: 'Reviews submitted evidence and approves or rejects it before it is recorded.' },
+              { role: 'Tester', color: 'green', desc: 'Performs control testing to validate design and operating effectiveness.' },
+            ].map(({ role, color, desc }) => (
+              <div key={role} className={`rounded-lg border border-${color}-500/20 bg-${color}-500/5 p-4`}>
+                <div className={`text-xs font-bold uppercase tracking-wider text-${color}-400 mb-1`}>{role}</div>
+                <p className="text-xs text-[var(--text-secondary)]">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl overflow-hidden shadow-sm">
+          <div className="p-5 border-b border-[var(--card-border)] flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-semibold text-[var(--text-primary)]">Controls</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">Select a user to assign them as owner, reviewer, or tester for each control.</p>
+            </div>
+            <span className="text-xs font-medium text-[var(--text-secondary)] bg-[var(--bg-secondary)] px-3 py-1 rounded-full border border-[var(--card-border)]">
+              {controls.length} controls
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-[var(--bg-secondary)] text-[var(--text-secondary)] font-medium border-b border-[var(--card-border)]">
+                <tr>
+                  <th className="px-6 py-3 text-xs uppercase tracking-wider">Control</th>
+                  <th className="px-6 py-3 text-xs uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-xs uppercase tracking-wider">
+                    <span className="text-blue-400">Owner</span>
+                  </th>
+                  <th className="px-6 py-3 text-xs uppercase tracking-wider">
+                    <span className="text-purple-400">Reviewer</span>
+                  </th>
+                  <th className="px-6 py-3 text-xs uppercase tracking-wider">
+                    <span className="text-green-400">Tester</span>
+                  </th>
                 </tr>
-              );
-            })}
-            {!controls.length ? (
-              <tr>
-                <td style={{ padding: 12, color: '#6b7280' }} colSpan={5}>
-                  No controls returned.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
+              </thead>
+              <tbody className="divide-y divide-[var(--card-border)]">
+                {controls.slice(0, 200).map((control: any) => {
+                  const assignment = assignments[String(control.control_id)] || {};
+                  return (
+                    <tr key={String(control.control_id)} className="hover:bg-[var(--bg-secondary)] transition-colors group">
+                      <td className="px-6 py-3">
+                        <span className="font-mono font-semibold text-[var(--accent-blue)] text-xs">
+                          {String(control.control_id)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3">
+                        <span className="text-[var(--text-secondary)] text-xs group-hover:text-[var(--text-primary)] transition-colors line-clamp-1 max-w-[240px]">
+                          {String(control.title || control.name || '')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 min-w-[180px]">
+                        <UserSelect
+                          value={String(assignment.owner_user_id || '')}
+                          onChange={(v) => handleAssign(String(control.control_id), 'owner_user_id', v)}
+                          disabled={loading}
+                        />
+                      </td>
+                      <td className="px-6 py-3 min-w-[180px]">
+                        <UserSelect
+                          value={String(assignment.reviewer_user_id || '')}
+                          onChange={(v) => handleAssign(String(control.control_id), 'reviewer_user_id', v)}
+                          disabled={loading}
+                        />
+                      </td>
+                      <td className="px-6 py-3 min-w-[180px]">
+                        <UserSelect
+                          value={String(assignment.tester_user_id || '')}
+                          onChange={(v) => handleAssign(String(control.control_id), 'tester_user_id', v)}
+                          disabled={loading}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!controls.length ? (
+                  <tr>
+                    <td className="px-6 py-12 text-center text-[var(--text-secondary)]" colSpan={5}>
+                      No controls returned.
+                    </td>
+                  </tr>
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-
-      <div style={{ marginTop: 24, padding: 16, background: '#f3f4f6', borderRadius: 8 }}>
-        <h3 style={{ marginTop: 0 }}>Assignment Rules</h3>
-        <ul style={{ marginBottom: 0 }}>
-          <li>
-            <strong>Owner:</strong> Responsible for providing evidence (auto-creates evidence request)
-          </li>
-          <li>
-            <strong>Reviewer:</strong> Reviews and approves/rejects evidence
-          </li>
-          <li>
-            <strong>Tester:</strong> Performs control testing (design + operating effectiveness)
-          </li>
-        </ul>
-      </div>
-    </div>
+    </main>
   );
 }
-
